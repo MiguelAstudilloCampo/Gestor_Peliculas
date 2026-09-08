@@ -92,9 +92,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gestorpeliculas',
+        'NAME': 'Peliculas',
         'USER':'root',
-        'PASSWORD':'Ruffito202104',
+        'PASSWORD':'root',
         'HOST':'localhost',
         'PORT':'3308'
     }
