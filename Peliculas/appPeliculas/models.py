@@ -19,7 +19,7 @@ class tipo (models.Model):
         return self.tip_nombre    
 
 class peliculas (models.Model):
-    pel_codigo = models.CharField(max_length=10, unique=True)
+    ##pel_codigo = models.PositiveIntegerField(unique=True)
     pel_titulo = models.CharField(max_length=80)
     pel_protagonista = models.CharField(max_length=80)
     pel_duracion = models.IntegerField()

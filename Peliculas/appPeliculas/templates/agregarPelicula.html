@@ -199,7 +199,6 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        .row--code { grid-template-columns: 150px 1fr; }
 
         .field {
             display: flex;
@@ -390,8 +389,7 @@
             .poster-frame { width: 110px; flex-shrink: 0; }
             .poster-controls { flex: 1; }
             .form-panel { padding: 30px 22px 28px; }
-            .row,
-            .row--code { grid-template-columns: 1fr; gap: 20px; }
+            .row { grid-template-columns: 1fr; gap: 20px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -434,7 +432,7 @@
             <h1>Agregar Película</h1>
             <a class="btn btn--ghost btn--sm" href="/">Inicio</a>
           </div>
-          <p class="subtitle">Completa los datos para añadirla al catálogo.</p>
+          <p class="subtitle">Completa los datos para añadirla al catálogo. El código se asigna automáticamente.</p>
 
           {% if mensaje %}
           <div class="mensaje" role="status">{{ mensaje }}</div>
@@ -448,15 +446,9 @@
           >
             {% csrf_token %}
 
-            <div class="row row--code">
-              <div class="field">
-                <label for="cod">Código</label>
-                <input id="cod" name="cod" type="text" autocomplete="off" required />
-              </div>
-              <div class="field">
-                <label for="title">Nombre</label>
-                <input id="title" name="title" type="text" autocomplete="off" placeholder="Título de la película" required />
-              </div>
+            <div class="field">
+              <label for="title">Nombre</label>
+              <input id="title" name="title" type="text" autocomplete="off" placeholder="Título de la película" required />
             </div>
 
             <div class="row">

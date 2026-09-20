@@ -385,9 +385,15 @@
             <div class="cine-toolbar">
                 <div class="cine-field">
                     <label for="filtroTipo">Filtrar por tipo</label>
-                    <select id="filtroTipo" class="form-select">
-                        <option value="">Todos los tipos</option>
-                    </select>
+<select id="filtroTipo" class="form-select">
+    <option value="">Todos los tipos</option>
+
+    {% for tipo in tipos %}
+        <option value="{{ tipo.tip_nombre }}">
+            {{ tipo.tip_nombre }}
+        </option>
+    {% endfor %}
+</select>
                 </div>
                 <button type="button" id="btnLimpiar" class="cine-clear">Limpiar filtros</button>
             </div>
@@ -395,7 +401,6 @@
             <table id="tblProductos">
                 <thead>
                     <tr>
-                        <th scope="col">Código</th>
                         <th scope="col">Nombre</th>
                         <th scope="col">Protagonista</th>
                         <th scope="col">Duración</th>
@@ -410,7 +415,6 @@
                 <tbody>
                     {% for p in movies %}
                     <tr>
-                        <td>{{ p.pel_codigo }}</td>
                         <td class="titulo">{{ p.pel_titulo }}</td>
                         <td>{{ p.pel_protagonista }}</td>
                         <td>{{ p.pel_duracion }}</td>
@@ -499,19 +503,7 @@
             var btnLimpiar = document.getElementById('btnLimpiar');
 
             // Llenar el select con los tipos que aparecen en la tabla (con su cantidad)
-            var conteo = {};
-            tabla.column(colTipo).nodes().toArray().forEach(function (td) {
-                var nombre = td.textContent.trim();
-                if (nombre) { conteo[nombre] = (conteo[nombre] || 0) + 1; }
-            });
-            Object.keys(conteo)
-                .sort(function (a, b) { return a.localeCompare(b, 'es'); })
-                .forEach(function (nombre) {
-                    var opcion = document.createElement('option');
-                    opcion.value = nombre;
-                    opcion.textContent = nombre + ' (' + conteo[nombre] + ')';
-                    selectTipo.appendChild(opcion);
-                });
+
 
             function escaparRegex(texto) {
                 return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

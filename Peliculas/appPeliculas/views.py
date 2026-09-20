@@ -32,10 +32,8 @@ def agregarGenero (request):
     return render(request, "agregarGenero.html", retorno);
 
 
-
 def vistaAgregartipo(request):
     return render (request, "agregartipo.html");
-
 
 
 @csrf_exempt
@@ -62,9 +60,12 @@ def listarPeliculas(request, tipo_id=None):
         movies = peliculas.objects.all()
         tipo_actual = None
 
+    tipos = tipo.objects.all()
+
     retorno = {
         "movies": movies,
-        "tipo_actual": tipo_actual
+        "tipo_actual": tipo_actual,
+        "tipos": tipos
     }
 
     return render(request, "listarPeliculas.html", retorno)
@@ -90,7 +91,7 @@ def vistaAgregarPeliculas (request):
 # @csrf_exempt
 def agregarPelicula (request):
     try:
-        codigo = request.POST["cod"]
+        ##codigo = request.POST["cod"]
         titulo = request.POST["title"]
         protagonista = request.POST["prota"]
         duracion = int(request.POST["dure"])
@@ -105,7 +106,7 @@ def agregarPelicula (request):
         gener = genero.objects.get(pk=idGenero)
         tip = tipo.objects.get(pk=idTipo)
         
-        peli = peliculas (pel_codigo = codigo,
+        peli = peliculas (##pel_codigo = codigo,
                           pel_titulo = titulo,
                           pel_protagonista = protagonista,
                           pel_duracion = duracion,
@@ -140,7 +141,7 @@ def actualizarPelicula(request):
         idPelicula = request.POST['idPelicula']
         peliculaActualizar = peliculas.objects.get(pk=idPelicula)
         
-        peliculaActualizar.pel_codigo = request.POST["cod"]
+        ##peliculaActualizar.pel_codigo = request.POST["cod"]
         peliculaActualizar.pel_titulo = request.POST["title"]
         peliculaActualizar.pel_protagonista = request.POST["prota"]
         peliculaActualizar.pel_duracion = int(request.POST["dure"])
