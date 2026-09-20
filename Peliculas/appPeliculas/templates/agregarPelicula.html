@@ -1,71 +1,597 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script>
-        function visualizarFoto(event) {
-            var imagen = document.getElementById('imagenPreview');
-            imagen.src = URL.createObjectURL(event.target.files[0]);
-        }
-    </script>
-    <link rel="stylesheet" href="../static/Style/agregarProducto.css">
-</head>
-<body>
-    <div class=" p-4 d-flex flex-column align-items-center justify-content-center gap-4">
-        <div class="grande container col-5 p-4 d-flex flex-column align-items-center justify-content-center">
-            <h2>Agregar Pelicula</h2>
-            <a class="btn btn-secondary" href="/">Inicio</a>
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Agregar Película</title>
 
-            <form action="/agregarPelicula/" method="post" enctype="multipart/form-data" class="d-flex flex-column gap-4 align-items-center justify-content-center ">
-                @{% csrf_token %}
-                <div class="d-flex flex-column gap-1">
-                    <span>Codigo:</span>
-                    <input name="cod" id="" type="text">
-                </div>
-                <div class="d-flex flex-column gap-1">
-                    <span>Nombre:</span>
-                    <input name="title" id="" type="text">
-                </div>
-                <div class="d-flex flex-column gap-1">
-                    <span>Protagonista:</span>
-                    <input name="prota" id="" type="text">
-                </div>
-                <div class="d-flex flex-column gap-1">
-                    <span>Duracion:</span>
-                    <input name="dure" id="" type="text">
-                </div>
-                <div class="d-flex flex-column gap-1">
-                    <span>Sinopsis:</span>
-                    <textarea cols="50" rows="3" type="text" name="sinop" value=""></textarea>
-                </div>
-                <div class="d-flex flex-column justify-content-center align-items-center gap-1">
-                    <span>Foto:</span>
-                    <input type="file" id="" name="photo" onchange="visualizarFoto(event)">
-                    <img id="imagenPreview" src="" alt="Vista previa de la imagen" style="max-width: 200px; max-height: 200px;">
-                </div>
-                <div class="d-flex flex-column gap-1">
-                    <span>Genero:</span>
-                    <select name="idGenero" id="">
-                        <option value="">Seleccione</option>
-                        {% for g in generos %}
-                            <option value="{{g.id}}">{{g.gen_nombre}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="d-flex gap-4">
-                    <button class="btn btn-primary">Aceptar</button>
-                    <a class="btn btn-danger" href="/">Cancelar</a>
-                </div>
-                <div>
-                    {{mensaje}}
-                </div>
-            </form>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'Style/agregarProducto.css' %}" />
+
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #12121a;
+            --card: #1b1b28;
+            --panel: #161621;
+            --card-edge: #262637;
+            --field: #14141f;
+            --gold: #d4a94f;
+            --text: #f1ede3;
+            --text-muted: #9c96ab;
+            --danger: #c0554a;
+            --danger-text: #e2796d;
+        }
+
+        * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(212, 169, 79, 0.06), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(212, 169, 79, 0.05), transparent 40%);
+            font-family: "Source Sans 3", sans-serif;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 56px 20px;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* ---------- Ticket ---------- */
+        .ticket {
+            width: 100%;
+            max-width: 880px;
+            background: var(--card);
+            border: 1px solid var(--card-edge);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket::before,
+        .ticket::after {
+            content: "";
+            display: block;
+            height: 16px;
+            background-image: radial-gradient(circle, var(--bg) 3px, transparent 3.5px);
+            background-size: 22px 16px;
+            background-position: center;
+            background-color: #0d0d13;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+        }
+
+        /* ---------- Panel del póster (talón del ticket) ---------- */
+        .poster-panel {
+            background: var(--panel);
+            border-right: 2px dashed var(--card-edge);
+            padding: 40px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .poster-frame {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            border: 1px dashed var(--card-edge);
+            border-radius: 3px;
+            background: #0f0f17;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.15s ease;
+        }
+
+        .poster-frame:hover { border-color: var(--gold); }
+
+        #imagenPreview {
+            display: none;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #imagenPreview.visible { display: block; }
+
+        #posterPlaceholder {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-align: center;
+            padding: 0 16px;
+            line-height: 1.5;
+        }
+        #posterPlaceholder.hidden { display: none; }
+
+        .poster-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #foto:focus-visible ~ .poster-frame,
+        #foto:focus-visible ~ .poster-controls .file-label {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+
+        /* ---------- Panel del formulario ---------- */
+        .form-panel {
+            padding: 40px 44px 36px;
+            min-width: 0;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 4px;
+        }
+
+        h1 {
+            font-family: "Oswald", sans-serif;
+            font-weight: 600;
+            font-size: 1.9rem;
+            letter-spacing: 0.02em;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin: 0 0 28px;
+            border-bottom: 1px solid var(--card-edge);
+            padding-bottom: 24px;
+        }
+
+        .mensaje {
+            margin: 0 0 24px;
+            padding: 10px 14px;
+            border: 1px solid var(--card-edge);
+            border-left: 3px solid var(--gold);
+            border-radius: 3px;
+            background: var(--field);
+            font-size: 0.92rem;
+            color: var(--text);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .row--code { grid-template-columns: 150px 1fr; }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            border: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .field label,
+        .field legend {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            padding: 0;
+        }
+
+        .opt {
+            font-weight: 400;
+            opacity: 0.75;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: var(--field);
+            border: 1px solid var(--card-edge);
+            border-radius: 3px;
+            padding: 10px 12px;
+            width: 100%;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        ::placeholder { color: #7d7890; opacity: 1; }
+
+        textarea {
+            resize: vertical;
+            min-height: 96px;
+            line-height: 1.5;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 169, 79, 0.15);
+        }
+
+        /* Error visible solo después de que la persona interactuó con el campo */
+        input:user-invalid,
+        textarea:user-invalid,
+        select:user-invalid {
+            border-color: var(--danger);
+        }
+
+        select {
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+                              linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+            background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+            padding-right: 34px;
+        }
+
+        .hint {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .hint a { color: var(--gold); }
+        .hint--error { color: var(--danger-text); }
+
+        /* ---------- Selector Sí / No ---------- */
+        .segmented {
+            position: relative;
+            display: inline-flex;
+            align-self: flex-start;
+            border: 1px solid var(--card-edge);
+            border-radius: 3px;
+            overflow: hidden;
+            background: var(--field);
+        }
+        .segmented input {
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+        .segmented label {
+            padding: 9px 26px;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .segmented label:hover { color: var(--text); }
+        .segmented input:checked + label {
+            background: var(--gold);
+            color: #1b1607;
+            font-weight: 600;
+        }
+        .segmented input:focus-visible + label {
+            outline: 2px solid var(--gold);
+            outline-offset: -3px;
+        }
+        .segmented input:checked:focus-visible + label {
+            outline-color: #1b1607;
+        }
+
+        /* ---------- Botones ---------- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Oswald", sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.03em;
+            padding: 12px 22px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            white-space: nowrap;
+            transition: filter 0.12s ease, border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+        }
+        .btn--sm { font-size: 0.8rem; padding: 8px 16px; }
+
+        .btn--primary {
+            background: var(--gold);
+            color: #1b1607;
+        }
+        .btn--primary:hover { filter: brightness(1.08); }
+
+        .btn--ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border-color: var(--card-edge);
+        }
+        .btn--ghost:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .btn--danger {
+            background: transparent;
+            color: var(--danger-text);
+            border-color: var(--danger);
+        }
+        .btn--danger:hover { background: rgba(192, 85, 74, 0.12); }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+            filter: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 8px;
+        }
+        .actions .btn { flex: 1; }
+
+        /* ---------- Responsive y accesibilidad ---------- */
+        @media (max-width: 700px) {
+            body { padding: 32px 14px; }
+            .split { grid-template-columns: 1fr; }
+            .poster-panel {
+                border-right: none;
+                border-bottom: 2px dashed var(--card-edge);
+                flex-direction: row;
+                align-items: center;
+                padding: 28px 22px;
+            }
+            .poster-frame { width: 110px; flex-shrink: 0; }
+            .poster-controls { flex: 1; }
+            .form-panel { padding: 30px 22px 28px; }
+            .row,
+            .row--code { grid-template-columns: 1fr; gap: 20px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+        }
+    </style>
+  </head>
+
+  <body>
+    <div class="ticket">
+      <div class="split">
+
+        <!-- Póster: el input vive aquí pero se envía con el formulario gracias al atributo form -->
+        <aside class="poster-panel">
+          <input
+            id="foto"
+            class="visually-hidden"
+            type="file"
+            name="photo"
+            accept="image/*"
+            form="formPelicula"
+          />
+
+          <label class="poster-frame" for="foto">
+            <img id="imagenPreview" alt="Vista previa del póster seleccionado" />
+            <span id="posterPlaceholder">Vista previa<br />del póster</span>
+          </label>
+
+          <div class="poster-controls">
+            <label class="btn btn--primary btn--sm file-label" for="foto">
+              <span id="textoBotonFoto">Subir foto</span>
+            </label>
+            <button type="button" id="btnQuitarFoto" class="btn btn--ghost btn--sm" hidden>Quitar foto</button>
+            <p id="fotoError" class="hint hint--error" role="alert" hidden></p>
+          </div>
+        </aside>
+
+        <div class="form-panel">
+          <div class="top-row">
+            <h1>Agregar Película</h1>
+            <a class="btn btn--ghost btn--sm" href="/">Inicio</a>
+          </div>
+          <p class="subtitle">Completa los datos para añadirla al catálogo.</p>
+
+          {% if mensaje %}
+          <div class="mensaje" role="status">{{ mensaje }}</div>
+          {% endif %}
+
+          <form
+            id="formPelicula"
+            action="/agregarPelicula/"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            {% csrf_token %}
+
+            <div class="row row--code">
+              <div class="field">
+                <label for="cod">Código</label>
+                <input id="cod" name="cod" type="text" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label for="title">Nombre</label>
+                <input id="title" name="title" type="text" autocomplete="off" placeholder="Título de la película" required />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="prota">Protagonista</label>
+                <input id="prota" name="prota" type="text" autocomplete="off" placeholder="Actor o actriz principal" required />
+              </div>
+              <div class="field">
+                <label for="dure">Duración (min)</label>
+                <input id="dure" name="dure" type="number" inputmode="numeric" min="1" step="1" placeholder="120" required />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="sinop">Sinopsis <span class="opt">(opcional)</span></label>
+              <textarea id="sinop" name="sinop" rows="3" placeholder="Resume la trama en pocas líneas"></textarea>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="idGenero">Género</label>
+                <select id="idGenero" name="idGenero" required>
+                  <option value="">Seleccione</option>
+                  {% for g in generos %}
+                  <option value="{{ g.id }}">{{ g.gen_nombre }}</option>
+                  {% endfor %}
+                </select>
+                {% if not generos %}
+                <p class="hint">Aún no hay géneros. <a href="/vistaAgregargenero/">Agregar género</a></p>
+                {% endif %}
+              </div>
+              <div class="field">
+                <label for="idTipo">Tipo</label>
+                <select id="idTipo" name="idTipo" required>
+                  <option value="">Seleccione</option>
+                  {% for t in tipos %}
+                  <option value="{{ t.id }}">{{ t.tip_nombre }}</option>
+                  {% endfor %}
+                </select>
+                {% if not tipos %}
+                <p class="hint">Aún no hay tipos. <a href="/vistaAgregartipo/">Agregar tipo</a></p>
+                {% endif %}
+              </div>
+            </div>
+
+            <fieldset class="field">
+              <legend>¿Vista?</legend>
+              <div class="segmented">
+                <input type="radio" id="visto-no" name="pel_visto" value="No" checked />
+                <label for="visto-no">No</label>
+                <input type="radio" id="visto-si" name="pel_visto" value="Si" />
+                <label for="visto-si">Sí</label>
+              </div>
+            </fieldset>
+
+            <div class="actions">
+              <button type="submit" id="btnGuardar" class="btn btn--primary">Guardar película</button>
+              <a class="btn btn--danger" href="/">Cancelar</a>
+            </div>
+          </form>
         </div>
 
+      </div>
     </div>
-</body>
+
+    <script>
+      (function () {
+        var input = document.getElementById("foto");
+        var imagen = document.getElementById("imagenPreview");
+        var placeholder = document.getElementById("posterPlaceholder");
+        var btnQuitar = document.getElementById("btnQuitarFoto");
+        var textoBoton = document.getElementById("textoBotonFoto");
+        var error = document.getElementById("fotoError");
+        var urlActual = null;
+
+        function limpiarVistaPrevia() {
+          if (urlActual) {
+            URL.revokeObjectURL(urlActual);
+            urlActual = null;
+          }
+          imagen.removeAttribute("src");
+          imagen.classList.remove("visible");
+          placeholder.classList.remove("hidden");
+          btnQuitar.hidden = true;
+          textoBoton.textContent = "Subir foto";
+        }
+
+        input.addEventListener("change", function () {
+          var archivo = input.files[0];
+          error.hidden = true;
+
+          // Si cancelan el selector, el navegador vacía el input: quitamos la vista previa vieja
+          if (!archivo) {
+            limpiarVistaPrevia();
+            return;
+          }
+
+          if (!archivo.type || archivo.type.indexOf("image/") !== 0) {
+            input.value = "";
+            limpiarVistaPrevia();
+            error.textContent = "El archivo debe ser una imagen (JPG, PNG o WEBP).";
+            error.hidden = false;
+            return;
+          }
+
+          if (urlActual) URL.revokeObjectURL(urlActual);
+          urlActual = URL.createObjectURL(archivo);
+          imagen.src = urlActual;
+          imagen.classList.add("visible");
+          placeholder.classList.add("hidden");
+          btnQuitar.hidden = false;
+          textoBoton.textContent = "Cambiar foto";
+        });
+
+        btnQuitar.addEventListener("click", function () {
+          input.value = "";
+          error.hidden = true;
+          limpiarVistaPrevia();
+        });
+
+        // Evitar envíos dobles
+        var form = document.getElementById("formPelicula");
+        var btnGuardar = document.getElementById("btnGuardar");
+        form.addEventListener("submit", function () {
+          btnGuardar.disabled = true;
+          btnGuardar.textContent = "Guardando…";
+        });
+        // Si vuelven con el botón "atrás", reactivar el botón
+        window.addEventListener("pageshow", function (e) {
+          if (e.persisted) {
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = "Guardar película";
+          }
+        });
+      })();
+    </script>
+  </body>
 </html>

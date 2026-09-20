@@ -22,15 +22,18 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',views.listarPeliculas),
-    path('vistaAgregargenero/', views.vistaAgregargenero),
-    path('agregarGenero/', views.agregarGenero),
-    path('vistaAgregarPelicula/', views.vistaAgregarPeliculas),
-    path('agregarPelicula/', views.agregarPelicula),
-    path('consultarPelicula/<int:id>/', views.consultarPelicula),
-    path('actualizarPelicula/', views.actualizarPelicula),
-    path('eliminarPelicula/<int:id>/', views.eliminarPelicula),
-    
+    ##path('', views.inicioTipos, name='inicioTipos'),
+    path('', views.listarPeliculas, name='listarPeliculas'),
+    path('Peliculas/tipo/<int:tipo_id>/', views.listarPeliculas, name='listarPeliculasPorTipo'),
+    path('vistaAgregargenero/', views.vistaAgregargenero, name='vistaAgregargenero'),
+    path('agregarGenero/', views.agregarGenero, name='agregarGenero'),
+    path('vistaAgregarPelicula/', views.vistaAgregarPeliculas, name='vistaAgregarPeliculas'),
+    path('agregarPelicula/', views.agregarPelicula, name='agregarPelicula'),
+    path('consultarPelicula/<int:id>/', views.consultarPelicula, name='consultarPelicula'),
+    path('actualizarPelicula/', views.actualizarPelicula, name='actualizarPelicula'),
+    path('eliminarPelicula/<int:id>/', views.eliminarPelicula, name='eliminarPelicula'),
+    path('vistaAgregartipo/', views.vistaAgregartipo, name='vistaAgregartipo'),
+    path('agregarTipo/', views.agregarTipo, name='agregarTipo'),
 ]
 
 if settings.DEBUG:

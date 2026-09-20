@@ -1,60 +1,298 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <title>Actualizar Película</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/Style/actualizarPelicula.css">
+    <style>
+        :root {
+            --bg: #12121a;
+            --card: #1b1b28;
+            --card-edge: #262637;
+            --gold: #d4a94f;
+            --gold-dim: #8a713a;
+            --text: #f1ede3;
+            --text-muted: #9c96ab;
+            --danger: #c0554a;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(212, 169, 79, 0.06), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(212, 169, 79, 0.05), transparent 40%);
+            font-family: "Source Sans 3", sans-serif;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 56px 20px;
+        }
+
+        .ticket {
+            width: 100%;
+            max-width: 560px;
+            background: var(--card);
+            border: 1px solid var(--card-edge);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* film-strip sprocket edge, top and bottom */
+        .ticket::before,
+        .ticket::after {
+            content: "";
+            display: block;
+            height: 16px;
+            background-image: radial-gradient(circle, var(--bg) 3px, transparent 3.5px);
+            background-size: 22px 16px;
+            background-position: center;
+            background-color: #0d0d13;
+        }
+
+        .ticket-body {
+            padding: 40px 44px 36px;
+        }
+
+        h1 {
+            font-family: "Oswald", sans-serif;
+            font-weight: 600;
+            font-size: 1.9rem;
+            letter-spacing: 0.02em;
+            margin: 0 0 4px;
+            color: var(--text);
+        }
+
+        .subtitle {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            margin: 0 0 32px;
+            border-bottom: 1px solid var(--card-edge);
+            padding-bottom: 24px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label, .field span {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        textarea,
+        select {
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: #14141f;
+            border: 1px solid var(--card-edge);
+            border-radius: 3px;
+            padding: 10px 12px;
+            width: 100%;
+            transition: border-color 0.15s ease;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 84px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 169, 79, 0.15);
+        }
+
+        input[type="file"] {
+            padding: 8px 10px;
+            color: var(--text-muted);
+        }
+
+        input[type="file"]::file-selector-button {
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--bg);
+            background: var(--gold);
+            border: none;
+            border-radius: 3px;
+            padding: 6px 12px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        select {
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+                               linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+            background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+        }
+
+        .actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        button, .btn-cancel {
+            font-family: "Oswald", sans-serif;
+            font-size: 0.88rem;
+            letter-spacing: 0.03em;
+            padding: 12px 22px;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            flex: 1;
+            transition: transform 0.12s ease, filter 0.12s ease;
+        }
+
+        button {
+            background: var(--gold);
+            color: #1b1607;
+        }
+
+        button:hover {
+            filter: brightness(1.08);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(192, 85, 74, 0.1);
+        }
+
+        @media (max-width: 520px) {
+            .ticket-body { padding: 30px 22px 28px; }
+            .row { grid-template-columns: 1fr; gap: 20px; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4 p-4 col-6 border border-black p-2 mb-2 rounded-5 d-flex flex-column gap-4 justify-content-center align-items-center">
-        <h1>Actualizar Producto</h1>
-        <form class="d-flex flex-column gap-3 justify-content-center align-items-center" action="/actualizarPelicula/" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="d-flex flex-column gap-1 text-center ">
-                <span>Codigo</span>
-                <input type="number" name="cod" value="{{pelicula.pel_codigo}}">
-            </div>
-            <div class="d-flex flex-column gap-1 text-center ">
-                <span>Titulo</span>
-                <input type="text" name="title" value="{{pelicula.pel_titulo}}">
-            </div>
-            <div class="d-flex flex-column gap-1 text-center ">
-                <span>Protagonista</span>
-                <input type="text" name="prota" value="{{pelicula.pel_protagonista}}">
-            </div>
-            <div class="d-flex flex-column gap-1 text-center ">
-                <span>Duracion</span>
-                <input type="number" name="dure" value="{{pelicula.pel_duracion}}">
-            </div>
-            <div class="d-flex flex-column gap-1 text-center ">
-                <span>Sinopsis</span>
-                <textarea cols="30" rows="3" type="text" name="sinop" value="">{{pelicula.pel_sinopsis}}</textarea>
-            </div>
-            <div class="d-flex flex-column gap-1 text-center ">
-                <span>Foto</span>
-                <input type="file" name="photo">
-            </div>
-            <div class="d-flex flex-column gap-1 text-center ">
-                <select name="idGenero" id="">
-                    <option value="">Seleccione</option>
-                    {% for g in generos %}
-                    {%if g.id == pelicula.pel_genero.id %}
-                    <option value="{{g.id}}" selected>{{g.gen_nombre}}</option>
-                    {%else%}
-                    <option value="{{g.id}}">{{g.gen_nombre}}</option>
-                    {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="d-flex gap-4 ">
-                <button class="btn btn-primary">Actualizar</button>
-                <a class="btn btn-danger" href="/">Cancelar</a>
-            </div>
-            <input type="hidden" name="idPelicula" value="{{pelicula.id}}">
-        </form>
+    <div class="ticket">
+        <div class="ticket-body">
+            <h1>Actualizar Película</h1>
+            <p class="subtitle">Edita los datos y guarda los cambios en el catálogo.</p>
+
+            <form action="/actualizarPelicula/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="field">
+                        <span>Código</span>
+                        <input type="number" name="cod" value="{{pelicula.pel_codigo}}">
+                    </div>
+                    <div class="field">
+                        <span>Duración (min)</span>
+                        <input type="number" name="dure" value="{{pelicula.pel_duracion}}">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <span>Título</span>
+                    <input type="text" name="title" value="{{pelicula.pel_titulo}}">
+                </div>
+
+                <div class="field">
+                    <span>Protagonista</span>
+                    <input type="text" name="prota" value="{{pelicula.pel_protagonista}}">
+                </div>
+
+                <div class="field">
+                    <span>Sinopsis</span>
+                    <textarea name="sinop">{{pelicula.pel_sinopsis}}</textarea>
+                </div>
+
+                <div class="field">
+                    <span>Foto</span>
+                    <input type="file" name="photo">
+                </div>
+
+                <div class="row">
+                    <div class="field">
+                        <span>Género</span>
+                        <select name="idGenero">
+                            <option value="">Seleccione</option>
+                            {% for g in generos %}
+                            {% if g.id == pelicula.pel_genero.id %}
+                            <option value="{{g.id}}" selected>{{g.gen_nombre}}</option>
+                            {% else %}
+                            <option value="{{g.id}}">{{g.gen_nombre}}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <span>Tipo</span>
+                        <select name="idTipo">
+                            <option value="">Seleccione</option>
+                            {% for t in tipos %}
+                            {% if t.id == pelicula.pel_tipo.id %}
+                            <option value="{{t.id}}" selected>{{t.tip_nombre}}</option>
+                            {% else %}
+                            <option value="{{t.id}}">{{t.tip_nombre}}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <span>¿Vista?</span>
+                    <select name="pel_visto" required>
+                        {% if pelicula.pel_visto == "True" %}
+                        <option value="No">No</option>
+                        <option value="Si" selected>Sí</option>
+                        {% else %}
+                        <option value="No" selected>No</option>
+                        <option value="Si">Sí</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <input type="hidden" name="idPelicula" value="{{pelicula.id}}">
+
+                <div class="actions">
+                    <button type="submit">Actualizar</button>
+                    <a class="btn-cancel" href="/">Cancelar</a>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 </html>

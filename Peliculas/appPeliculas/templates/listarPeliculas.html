@@ -1,16 +1,449 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% load static%}
-    <script src="{% static '../static/Js/app.js '%}"></script>
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdn.datatables.net/2.0.2/js/dataTables.js"></script>
+    <title>Tienda de películas</title>
 
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Librerías CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+
+    <!-- Tus estilos anteriores: los dejé desactivados porque este diseño ya cubre todo.
+         Si necesitas algo de ellos, vuelve a activarlos. -->
+    <!--
+    <link rel="stylesheet" href="{% static 'Style/ListarPeliculas.css' %}">
+    <link rel="stylesheet" href="{% static 'Style/ddd.css' %}">
+    -->
+
+    <style>
+        :root {
+            --ink: #171A2E;
+            --ink-soft: #2A2F4A;
+            --paper: #F1F2F7;
+            --surface: #FFFFFF;
+            --line: #DEE1EC;
+            --muted: #62677E;
+            --curtain: #C2263B;
+            --curtain-dark: #A11D30;
+            --marquee: #F4B942;
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--curtain);
+            outline-offset: 2px;
+        }
+
+        /* ---------- Encabezado tipo tira de película ---------- */
+        .cine-header {
+            background: var(--ink);
+            color: #fff;
+        }
+        .cine-header::before,
+        .cine-header::after {
+            content: '';
+            display: block;
+            height: 14px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14'%3E%3Crect x='7' y='3' width='14' height='8' rx='2' fill='%23F1F2F7'/%3E%3C/svg%3E") repeat-x;
+        }
+        .cine-header :focus-visible {
+            outline-color: var(--marquee);
+        }
+        .cine-header__inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 14px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .cine-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .cine-brand__icon {
+            width: 48px;
+            height: 48px;
+            padding: 7px;
+            background: var(--marquee);
+            border-radius: 10px;
+            object-fit: contain;
+        }
+        .cine-brand__name {
+            margin: 0;
+            font-family: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+            font-weight: 800;
+            font-size: 2.3rem;
+            line-height: 1;
+            letter-spacing: 0.02em;
+        }
+
+        .cine-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .cine-nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background-color 0.15s, border-color 0.15s;
+        }
+        .cine-nav a:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #fff;
+        }
+        .cine-nav a.cine-nav__primary {
+            background: var(--curtain);
+            border-color: var(--curtain);
+        }
+        .cine-nav a.cine-nav__primary:hover {
+            background: var(--curtain-dark);
+            border-color: var(--curtain-dark);
+        }
+
+        /* ---------- Contenido ---------- */
+        .cine-main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 28px 24px 56px;
+        }
+        .cine-titlebar h1 {
+            margin: 0;
+            font-family: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+            font-weight: 800;
+            font-size: 2.2rem;
+            letter-spacing: 0.01em;
+        }
+        .cine-titlebar p {
+            margin: 2px 0 0;
+            color: var(--muted);
+        }
+
+        .cine-panel {
+            margin-top: 20px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        /* ---------- Barra de filtros ---------- */
+        .cine-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+        .cine-field {
+            flex: 0 1 280px;
+            min-width: 220px;
+        }
+        .cine-field label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: var(--ink-soft);
+        }
+        .cine-field .form-select {
+            border-color: var(--line);
+            border-radius: 8px;
+            color: var(--ink);
+        }
+        .cine-field .form-select:focus {
+            border-color: var(--curtain);
+            box-shadow: 0 0 0 3px rgba(194, 38, 59, 0.2);
+        }
+        .cine-clear {
+            padding: 6px 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--ink);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+        .cine-clear:hover {
+            background: var(--paper);
+        }
+
+        /* ---------- DataTables ---------- */
+        .cine-panel .dt-container {
+            padding: 16px 20px 12px;
+        }
+        .cine-panel .dt-container .dt-layout-full {
+            overflow-x: auto;
+        }
+        .cine-panel .dt-container .dt-search input,
+        .cine-panel .dt-container .dt-length select {
+            padding: 6px 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--ink);
+        }
+        .cine-panel .dt-container .dt-search input:focus,
+        .cine-panel .dt-container .dt-length select:focus {
+            border-color: var(--curtain);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(194, 38, 59, 0.2);
+        }
+        .cine-panel .dt-container .dt-info {
+            color: var(--muted);
+        }
+        .cine-panel .dt-container .dt-paging .dt-paging-button {
+            border-radius: 8px !important;
+        }
+        .cine-panel .dt-container .dt-paging .dt-paging-button:hover:not(.disabled) {
+            background: var(--paper) !important;
+            border-color: var(--line) !important;
+            color: var(--ink) !important;
+        }
+        .cine-panel .dt-container .dt-paging .dt-paging-button.current,
+        .cine-panel .dt-container .dt-paging .dt-paging-button.current:hover {
+            background: var(--ink) !important;
+            border-color: var(--ink) !important;
+            color: #fff !important;
+        }
+        .cine-panel .dt-container .dt-paging .dt-paging-button.disabled {
+            opacity: 0.4;
+        }
+
+        /* ---------- Tabla ---------- */
+        #tblProductos {
+            width: 100%;
+            margin: 0 !important;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        #tblProductos > thead > tr > th {
+            padding: 12px 30px 12px 14px;
+            background: var(--ink);
+            color: #fff;
+            font-weight: 600;
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: 0;
+        }
+        #tblProductos > thead > tr > th:first-child { border-radius: 8px 0 0 0; }
+        #tblProductos > thead > tr > th:last-child { border-radius: 0 8px 0 0; }
+
+        #tblProductos > tbody > tr > td {
+            padding: 12px 14px;
+            background: var(--surface);
+            vertical-align: middle;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+        }
+        #tblProductos > tbody > tr:hover > td {
+            background: #F7F8FC;
+        }
+        #tblProductos .titulo {
+            font-weight: 700;
+        }
+        #tblProductos .sinopsis {
+            margin: 0;
+            min-width: 240px;
+            max-width: 360px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: var(--ink-soft);
+        }
+
+        .poster {
+            display: block;
+            width: 56px;
+            height: 84px;
+            object-fit: cover;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--paper);
+        }
+        .poster--empty {
+            display: grid;
+            place-items: center;
+            color: var(--muted);
+            font-size: 1.5rem;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .chip--tipo   { background: #E4E8F7; color: #24305E; }
+        .chip--genero { background: #FBEFD2; color: #6B4A00; }
+        .chip--si     { background: #E3F4EA; color: #1E7A4C; }
+        .chip--no     { background: #ECEEF4; color: #5B6076; }
+
+        .acciones {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        .icon-btn {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--ink);
+            font-size: 1.15rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .icon-btn:hover {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: #fff;
+        }
+        .icon-btn--danger:hover {
+            background: var(--curtain);
+            border-color: var(--curtain);
+        }
+
+        /* ---------- Responsive y accesibilidad ---------- */
+        @media (max-width: 640px) {
+            .cine-header__inner { padding: 12px 16px; }
+            .cine-brand__name { font-size: 1.8rem; }
+            .cine-main { padding: 20px 12px 40px; }
+            .cine-toolbar, .cine-panel .dt-container { padding-left: 12px; padding-right: 12px; }
+            .cine-field { flex-basis: 100%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="cine-header">
+        <div class="cine-header__inner">
+            <div class="cine-brand">
+                <img class="cine-brand__icon" src="{% static 'Icons/movies-podcast.png' %}" alt="">
+                <p class="cine-brand__name">Tienda de películas</p>
+            </div>
+            <nav class="cine-nav" aria-label="Acciones principales">
+                <a class="cine-nav__primary" href="/vistaAgregarPelicula/"><ion-icon name="add-outline"></ion-icon> Agregar película</a>
+                <a href="/vistaAgregargenero/">Agregar género</a>
+                <a href="/vistaAgregartipo/">Agregar tipo</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="cine-main">
+        <div class="cine-titlebar">
+            <h1>
+                {% if tipo_actual %}
+                    Películas de tipo: {{ tipo_actual.tip_nombre }}
+                {% else %}
+                    Catálogo de películas
+                {% endif %}
+            </h1>
+            <p>{{ movies|length }} película{{ movies|length|pluralize }} registrada{{ movies|length|pluralize }}</p>
+        </div>
+
+        <section class="cine-panel">
+            <div class="cine-toolbar">
+                <div class="cine-field">
+                    <label for="filtroTipo">Filtrar por tipo</label>
+                    <select id="filtroTipo" class="form-select">
+                        <option value="">Todos los tipos</option>
+                    </select>
+                </div>
+                <button type="button" id="btnLimpiar" class="cine-clear">Limpiar filtros</button>
+            </div>
+
+            <table id="tblProductos">
+                <thead>
+                    <tr>
+                        <th scope="col">Código</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Protagonista</th>
+                        <th scope="col">Duración</th>
+                        <th scope="col">Sinopsis</th>
+                        <th scope="col" data-col="foto">Foto</th>
+                        <th scope="col">Género</th>
+                        <th scope="col" data-col="tipo">Tipo</th>
+                        <th scope="col">Visto</th>
+                        <th scope="col" data-col="acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in movies %}
+                    <tr>
+                        <td>{{ p.pel_codigo }}</td>
+                        <td class="titulo">{{ p.pel_titulo }}</td>
+                        <td>{{ p.pel_protagonista }}</td>
+                        <td>{{ p.pel_duracion }}</td>
+                        <td><p class="sinopsis" title="{{ p.pel_sinopsis }}">{{ p.pel_sinopsis }}</p></td>
+                        <td>
+                            {% if p.pel_foto %}
+                                <img class="poster" src="/media/{{ p.pel_foto }}" alt="Póster de {{ p.pel_titulo }}" width="56" height="84" loading="lazy">
+                            {% else %}
+                                <span class="poster poster--empty" aria-hidden="true"><ion-icon name="film-outline"></ion-icon></span>
+                            {% endif %}
+                        </td>
+                        <td>{% if p.pel_genero %}<span class="chip chip--genero">{{ p.pel_genero.gen_nombre }}</span>{% endif %}</td>
+                        <td>{% if p.pel_tipo %}<span class="chip chip--tipo">{{ p.pel_tipo.tip_nombre }}</span>{% endif %}</td>
+                        <td>{% if p.pel_visto %}<span class="chip chip--si">Sí</span>{% else %}<span class="chip chip--no">No</span>{% endif %}</td>
+                        <td>
+                            <div class="acciones">
+                                <a href="/consultarPelicula/{{ p.id }}" class="icon-btn" title="Editar" aria-label="Editar {{ p.pel_titulo }}">
+                                    <ion-icon name="create-outline"></ion-icon>
+                                </a>
+                                <button type="button" onclick="eliminarPelicula('{{ p.id }}')" class="icon-btn icon-btn--danger" title="Eliminar" aria-label="Eliminar {{ p.pel_titulo }}">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Librerías JS (cada una cargada una sola vez) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.0.2/js/dataTables.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
@@ -20,84 +453,97 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.all.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.dataTables.css">
+    <!-- Tu JS (aquí vive eliminarPelicula) -->
+    <script src="{% static 'Js/app.js' %}"></script>
 
-    <link rel="stylesheet" href="../static/Style/ListarPeliculas.css">
-    <link rel="stylesheet" href="../static/Style/ddd.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css">
-</head>
-<body>
-  <div class=" d-flex flex-column gap-3 w-100 justify-content-center align-items-center">
-    <div class="head d-flex gap-4 justify-content-center align-items-center"> 
-        <h2>Tienda de peliculas</h2>
-        <img src="../static/Icons/movies-podcast.png" alt="">
-    </div>
-    <header>
-        <nav class="d-flex gap-4">
-            <button><a href="/vistaAgregarPelicula/">Agregar Peliculas</a></button>
-            <button><a href="/vistaAgregargenero/">Agregar Generos</a></button>
-        </nav>
-    </header>
-    <div class=" col-12 d-flex flex-column justify-content-center align-items-center gap-4 p-4">
-        <h2>Peliculas</h2>
-        <div>
-            <table id="tblProductos" class="table">
-                <thead class="table-dark">
-                  <tr>
-                    <th scope="col">Codigo</th>
-                    <th scope="col">Nombre</th>
-                    <th scope="col">Protagonista</th>
-                    <th scope="col">Duracion</th>
-                    <th scope="col">Sinopsis</th>
-                    <th scope="col">Foto</th>
-                    <th scope="col">Genero</th>
-                    <th scope="col">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {% for p in movies %}
-                  <tr>
-                    <td>{{p.pel_codigo}}</td>
-                    <td>{{p.pel_titulo}}</td>
-                    <td>{{p.pel_protagonista}}</td>
-                    <td>{{p.pel_duracion}}</td>
-                    <td>{{p.pel_sinopsis}}</td>
-                    <td><img src="/media/{{p.pel_foto}}" alt="" width="100" height="100"></td>
-                    <td>{{p.pel_genero.gen_nombre}}</td>
-                    <td>
-                      <div class="d-flex gap-3 justify-content-center align-items-center">
-                        <a href="/consultarPelicula/{{p.id}}" class="btn btn-primary"><ion-icon name="create-outline"></ion-icon></a>
-                        <button onclick="eliminarPelicula('{{p.id}}')" class="btn btn-danger"><ion-icon name="trash-outline"></ion-icon></button>
-                        
-                      </div>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-        </div>
-    </div>
     <script>
-        new DataTable('#tblProductos', {
-            layout: {
-                topStart: {
-                    buttons: ['excel', 'pdf', 'print']
+        document.addEventListener('DOMContentLoaded', function () {
+            var encabezados = Array.from(document.querySelectorAll('#tblProductos thead th'));
+            function indice(nombre) {
+                return encabezados.findIndex(function (th) { return th.dataset.col === nombre; });
+            }
+            var colFoto = indice('foto');
+            var colTipo = indice('tipo');
+            var colAcciones = indice('acciones');
+
+            var tabla = new DataTable('#tblProductos', {
+                pageLength: 10,
+                columnDefs: [
+                    { orderable: false, searchable: false, targets: [colFoto, colAcciones] }
+                ],
+                // Para activar exportación: layout: { topStart: { buttons: ['excel', 'pdf', 'print'] } },
+                language: {
+                    lengthMenu: 'Mostrar _MENU_ películas',
+                    search: 'Buscar',
+                    searchPlaceholder: 'Nombre, protagonista…',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ películas',
+                    infoEmpty: 'Sin resultados',
+                    infoFiltered: '(filtrado de _MAX_ en total)',
+                    zeroRecords: 'Ninguna película coincide con los filtros. Cambia el tipo o limpia los filtros.',
+                    emptyTable: 'Aún no hay películas. Agrega la primera con «Agregar película».',
+                    aria: {
+                        paginate: {
+                            first: 'Primera página',
+                            previous: 'Página anterior',
+                            next: 'Página siguiente',
+                            last: 'Última página'
+                        }
+                    }
                 }
+            });
+
+            /* ----- Filtro por tipo ----- */
+            var selectTipo = document.getElementById('filtroTipo');
+            var btnLimpiar = document.getElementById('btnLimpiar');
+
+            // Llenar el select con los tipos que aparecen en la tabla (con su cantidad)
+            var conteo = {};
+            tabla.column(colTipo).nodes().toArray().forEach(function (td) {
+                var nombre = td.textContent.trim();
+                if (nombre) { conteo[nombre] = (conteo[nombre] || 0) + 1; }
+            });
+            Object.keys(conteo)
+                .sort(function (a, b) { return a.localeCompare(b, 'es'); })
+                .forEach(function (nombre) {
+                    var opcion = document.createElement('option');
+                    opcion.value = nombre;
+                    opcion.textContent = nombre + ' (' + conteo[nombre] + ')';
+                    selectTipo.appendChild(opcion);
+                });
+
+            function escaparRegex(texto) {
+                return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            function aplicarFiltro() {
+                var valor = selectTipo.value;
+                var patron = valor ? '^\\s*' + escaparRegex(valor) + '\\s*$' : '';
+                tabla.column(colTipo).search(patron, true, false).draw();
+            }
+
+            selectTipo.addEventListener('change', aplicarFiltro);
+
+            btnLimpiar.addEventListener('click', function () {
+                selectTipo.value = '';
+                var cajaBusqueda = tabla.table().container().querySelector('.dt-search input');
+                if (cajaBusqueda) { cajaBusqueda.value = ''; }
+                tabla.search('');
+                tabla.column(colTipo).search('');
+                tabla.draw();
+            });
+
+            // Si la vista ya llega filtrada por un tipo, dejarlo seleccionado
+            var tipoActual = "{{ tipo_actual.tip_nombre|escapejs }}";
+            if (tipoActual && conteo[tipoActual]) {
+                selectTipo.value = tipoActual;
+                aplicarFiltro();
             }
         });
     </script>
-    <script
-    type="module"
-    src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-  ></script>
-  <script
-    nomodule
-    src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
-  ></script>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 </html>

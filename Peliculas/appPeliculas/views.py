@@ -1,7 +1,7 @@
 from django.shortcuts import render;
 from django.conf import settings;
 from django.db import Error;
-from appPeliculas.models import genero, peliculas;
+from appPeliculas.models import genero, peliculas, tipo;
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.shortcuts import render, redirect
@@ -10,7 +10,7 @@ import os
 # Create your views here.
 
 def inicio (request):
-    return render (request, "1Vista.html");
+    return render (request, "inicio.html");
 
 def vistaAgregargenero(request):
     return render (request, "agregarGenero.html");
@@ -29,21 +29,61 @@ def agregarGenero (request):
     
     retorno = {"mensaje":mensaje};
     # return JsonResponse(retorno);
-    return render(request, "agregargenero.html", retorno);
+    return render(request, "agregarGenero.html", retorno);
 
-def listarPeliculas (request):
-    movies = peliculas.objects.all();
+
+
+def vistaAgregartipo(request):
+    return render (request, "agregartipo.html");
+
+
+
+@csrf_exempt
+def agregarTipo(request):
+    if request.method != "POST":
+        return render(request, "agregartipo.html")
+
+    try:
+        nombre = request.POST.get("nombre")
+        type = tipo(tip_nombre=nombre)
+        type.save()
+        mensaje = "Tipo agregado exitosamente"
+    except Error as error:
+        mensaje = str(error)
+
+    return render(request, "agregartipo.html", {"mensaje": mensaje})
+
+
+def listarPeliculas(request, tipo_id=None):
+    if tipo_id:
+        movies = peliculas.objects.filter(pel_tipo_id=tipo_id)
+        tipo_actual = tipo.objects.get(id=tipo_id)
+    else:
+        movies = peliculas.objects.all()
+        tipo_actual = None
+
+    retorno = {
+        "movies": movies,
+        "tipo_actual": tipo_actual
+    }
+
+    return render(request, "listarPeliculas.html", retorno)
+
+def inicioTipos (request):
+    tipos = tipo.objects.all();
     
-    retorno = {"movies" : movies}
+    retorno = {"tipos" : tipos}
     
     # return JsonResponse(retorno);
-    return render (request, "listarPeliculas.html", retorno)
+    return render (request, "inicio.html", retorno)
 
 
 def vistaAgregarPeliculas (request):
     generos = genero.objects.all()
+    tipos = tipo.objects.all()
     
-    retorno = {"generos":generos}
+    retorno = {"generos":generos,
+               "tipos":tipos}
     
     return render (request, "agregarPelicula.html", retorno)
 
@@ -57,8 +97,13 @@ def agregarPelicula (request):
         sinopsis = request.POST["sinop"]
         foto = request.FILES["photo"]
         idGenero = request.POST["idGenero"]
+        idTipo = request.POST["idTipo"]
         
-        gener = genero.objects.get(pk=idGenero);
+        visto_input = request.POST.get("pel_visto")
+        pel_visto_valor = True if visto_input in ["Si", "true", "True", "1", "on"] else False
+        
+        gener = genero.objects.get(pk=idGenero)
+        tip = tipo.objects.get(pk=idTipo)
         
         peli = peliculas (pel_codigo = codigo,
                           pel_titulo = titulo,
@@ -66,10 +111,12 @@ def agregarPelicula (request):
                           pel_duracion = duracion,
                           pel_sinopsis = sinopsis,
                           pel_foto = foto,
-                          pel_genero = gener);
+                          pel_genero = gener,
+                          pel_tipo = tip,
+                          pel_visto = pel_visto_valor)
         
         peli.save()
-        mensaje ="Pelicula agregada exitosamente";
+        mensaje ="Pelicula agregada exitosamente"
         
         
     except Error as error :
@@ -84,7 +131,8 @@ def agregarPelicula (request):
 def consultarPelicula(request, id):
     pelicula = peliculas.objects.get(pk=id)
     generos = genero.objects.all()
-    retorno = {"pelicula":pelicula, "generos":generos}
+    tipos = tipo.objects.all()
+    retorno = {"pelicula":pelicula, "generos":generos, "tipos":tipos}
     return render(request,"actualizarPelicula.html",retorno)
 
 def actualizarPelicula(request):
@@ -98,6 +146,9 @@ def actualizarPelicula(request):
         peliculaActualizar.pel_duracion = int(request.POST["dure"])
         peliculaActualizar.pel_sinopsis = request.POST["sinop"]
         
+        visto_input = request.POST.get("pel_visto")
+        peliculaActualizar.pel_visto = True if visto_input in ["Si", "true", "True", "1", "on"] else False
+        
         
         if 'photo' in request.FILES:
             foto = request.FILES["photo"]
@@ -110,6 +161,10 @@ def actualizarPelicula(request):
         gener = genero.objects.get(pk=idGenero)
         peliculaActualizar.pel_genero = gener
         
+        idTipo = int(request.POST["idTipo"])
+        
+        tip = tipo.objects.get(pk=idTipo)
+        peliculaActualizar.pel_tipo = tip
         peliculaActualizar.save()
         
         mensaje = "Película actualizada exitosamente"
